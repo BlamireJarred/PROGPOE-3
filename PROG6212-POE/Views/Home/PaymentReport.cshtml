@@ -1,0 +1,125 @@
+﻿@model PROG6212_POE.Services.ReportResult
+
+@{
+    ViewData["Title"] = "Payment Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Payment Report</h2>
+    <button onclick="window.print()" class="btn btn-primary">
+        <i class="fas fa-print me-2"></i>Print Report
+    </button>
+</div>
+
+<!-- Report Header -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>@Model.Title</h4>
+                <p class="text-muted mb-0">Generated on: @Model.GeneratedDate.ToString("f")</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="border rounded p-2">
+                            <h6 class="mb-1">Total Claims</h6>
+                            <h4 class="text-primary mb-0">@Model.Summary.TotalClaims</h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded p-2">
+                            <h6 class="mb-1">Total Hours</h6>
+                            <h4 class="text-info mb-0">@Model.Summary.TotalHours</h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded p-2">
+                            <h6 class="mb-1">Total Amount</h6>
+                            <h4 class="text-success mb-0">@Model.Summary.TotalAmount.ToString("C")</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claims Details -->
+@if (Model.Data.Any())
+{
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="card-title mb-0">Approved Claims Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Lecturer</th>
+                            <th>Contract</th>
+                            <th>Hours</th>
+                            <th>Rate</th>
+                            <th>Total Amount</th>
+                            <th>Submitted</th>
+                            <th>Approved</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Data)
+                        {
+                            <tr>
+                                <td>@item.LecturerName</td>
+                                <td>@item.ContractName</td>
+                                <td>@item.HoursWorked</td>
+                                <td>@item.HourlyRate.ToString("C")</td>
+                                <td class="fw-bold">@item.TotalAmount.ToString("C")</td>
+                                <td>@item.SubmittedDate.ToString("MMM dd, yyyy")</td>
+                                <td>@item.ApprovedDate.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-secondary">
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Totals:</td>
+                            <td class="fw-bold">@Model.Summary.TotalAmount.ToString("C")</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No approved claims found for the selected period</h5>
+        <p class="mb-0">There are no approved claims between the specified dates.</p>
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-action="GenerateReports" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Reports
+    </a>
+</div>
+
+<style>
+    @@media print {
+        .btn, .mt-4 {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #000 !important;
+        }
+
+        .table-dark {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+    }
+</style>

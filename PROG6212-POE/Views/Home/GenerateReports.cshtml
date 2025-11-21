@@ -1,0 +1,117 @@
+﻿@model PROG6212_POE.Controllers.HomeController.ReportViewModel
+
+@{
+    ViewData["Title"] = "Generate Reports";
+}
+
+<h2 class="mb-4">Generate Reports</h2>
+
+<div class="row">
+    <!-- Payment Report -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Payment Report
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Generate a report of all approved claims within a specific date range.</p>
+
+                <form asp-action="GeneratePaymentReport" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="startDate" class="form-control"
+                               value="@Model.StartDate.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="endDate" class="form-control"
+                               value="@Model.EndDate.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-download me-2"></i>Generate Payment Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claims Summary Report -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Claims Summary Report
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Generate a summary report of claims by status.</p>
+
+                <form asp-action="GenerateClaimsSummaryReport" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Status Filter</label>
+                        <select name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Paid">Paid</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-info w-100">
+                        <i class="fas fa-chart-pie me-2"></i>Generate Summary Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-primary">@ViewBag.TotalClaims</h4>
+                            <p class="mb-0 text-muted">Total Claims</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-warning">@ViewBag.PendingClaims</h4>
+                            <p class="mb-0 text-muted">Pending</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-success">@ViewBag.ApprovedClaims</h4>
+                            <p class="mb-0 text-muted">Approved</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h4 class="text-danger">@ViewBag.RejectedClaims</h4>
+                            <p class="mb-0 text-muted">Rejected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="HRDashboard" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to HR Dashboard
+    </a>
+</div>

@@ -1,0 +1,163 @@
+﻿@model List<PROG6212_POE.Models.Claim>
+
+@{
+    ViewData["Title"] = "Coordinator Dashboard";
+}
+
+<h2 class="mb-4">Coordinator Dashboard</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <h5>No claims awaiting coordinator approval</h5>
+        <p class="mb-0">Claims that require coordinator attention will appear here based on automated workflow routing.</p>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header bg-warning">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-tasks me-2"></i>Claims Requiring Coordinator Approval
+                <span class="badge bg-light text-dark ms-2">@Model.Count</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Lecturer</th>
+                            <th>Contract</th>
+                            <th>Hours</th>
+                            <th>Rate</th>
+                            <th>Total</th>
+                            <th>Workflow Status</th>
+                            <th>Validation</th>
+                            <th>Document</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var claim in Model)
+                        {
+                            <tr>
+                                <td>@claim.Id</td>
+                                <td>@claim.LecturerName</td>
+                                <td>@claim.ContractName</td>
+                                <td>@claim.HoursWorked</td>
+                                <td>@claim.HourlyRate.ToString("C")</td>
+                                <td><strong>@claim.TotalAmount.ToString("C")</strong></td>
+                                <td>
+                                    <span class="badge @GetWorkflowStatusBadge(claim.WorkflowStatus)">
+                                        @claim.WorkflowStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (claim.AutoValidated)
+                                    {
+                                        <span class="badge bg-success" title="@claim.ValidationNotes">
+                                            Validated
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">
+                                            Manual Review
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(claim.SupportingDocumentPath))
+                                    {
+                                        <a href="@claim.SupportingDocumentPath" download class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-download me-1"></i>Download
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No document</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <form asp-action="CoordinatorApprove" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@claim.Id" />
+                                            <button type="submit" class="btn btn-success" title="Approve Claim">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form asp-action="CoordinatorReject" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@claim.Id" />
+                                            <button type="submit" class="btn btn-danger" title="Reject Claim" onclick="return confirm('Are you sure you want to reject this claim?')">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Value</h6>
+                    <h4>@Model.Sum(c => c.TotalAmount).ToString("C")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Average Claim</h6>
+                    <h4>@Model.Average(c => c.TotalAmount).ToString("C")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">High Value Claims</h6>
+                    <h4>@Model.Count(c => c.TotalAmount > 5000)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Back to Home
+    </a>
+</div>
+
+@functions {
+    public string GetWorkflowStatusBadge(string workflowStatus)
+    {
+        return workflowStatus?.ToLower() switch
+        {
+            "awaiting coordinator review" or "routetocoordinator" => "bg-warning",
+            "awaiting manager review" or "routetomanager" => "bg-info",
+            "autoapprove" or "fully approved" => "bg-success",
+            "reject" or "rejected" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
